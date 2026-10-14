@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUKEBOX</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="header">
+        <svg id="music icon" class="icon"></svg>
+        <p>Reproductor Musical</p>
+        <p>Práctica M6 - Javascript nativo + Tailwind + Howler.js</p> <!-- Mirar de añadir Tailwind -->
+    </div>
+
+    <main>
+        <div id="songList"></div>
+        <div id="playingNow"></div>
+        <div id="equalizer">
+
+        </div>
+    </main>
+    <div class="footer" id="player">
+        <div id="progressBar">
+            <span id="currentTime">0:00</span>
+            <input type="range" id="progressSlider" min="0" max="100" value="0">
+            <span id="totalTime">0:00</span>
+        </div>
+
+        <div id="songInfo">
+            <img id="coverArt" src="" alt="Cover Art">
+            <span id="currentSong">CanciónPlaceholder</span>
+            <span id="author">AutorPlaceholder</span>
+        </div>
+        <div id="controls">
+            <button id="random">🔀</button>
+            <button id="prevButton">⏮️</button>
+            <button id="playPauseButton">▶️</button>
+            <button id="nextButton">⏭️</button>
+            <button id="repeat">🔁</button>
+        </div>
+        <div id="volumeControl">
+            <label for="volumeSlider">VolumenPlaceholder:</label>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+            <span id="volumeValue">100%</span>
+        </div>
+    </div>
+</body>
+
+
+</html>

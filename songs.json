@@ -1,0 +1,12 @@
+{
+    "songs": [
+        {
+            "id": "1",
+            "name": "Fantasy",
+            "author": "Pufino",
+            "picture": "songs/images/pufino - fantasy.webp",
+            "file": "songs/Pufino - Fantasy (freetouse.com).mp3",
+            "duration": 215
+        }
+    ]
+}
