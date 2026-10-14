@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JUKEBOX</title>
     <link rel="stylesheet" href="styles.css">
+    <script defer src="index.js"></script>
 </head>
 
 <body>
@@ -16,8 +17,20 @@
     </div>
 
     <main>
-        <div id="songList"></div>
-        <div id="playingNow"></div>
+        <div id="songList">
+            <div id="songListHeader"><span>Lista de reproducción</span><span>11 canciones</span></div>
+            <div class="cards-container">
+                <div class="card">
+                    <img id="coverArt" src="" alt="Cover Art">
+                    <span id="songName">NombrePlaceholder</span>
+                    <span id="author">AutorPlaceholder</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="playingNow">
+
+        </div>
         <div id="equalizer">
 
         </div>
@@ -37,7 +50,7 @@
         <div id="controls">
             <button id="random">🔀</button>
             <button id="prevButton">⏮️</button>
-            <button id="playPauseButton">▶️</button>
+            <button id="playPauseButton" class="disabled" disabled>▶️</button>
             <button id="nextButton">⏭️</button>
             <button id="repeat">🔁</button>
         </div>
