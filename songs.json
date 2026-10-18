@@ -23,6 +23,70 @@
             "picture": "songs/covers/pufino-vibing.webp",
             "file": "songs/pufino-vibing.mp3",
             "duration": 132
+        },
+        {
+            "id": "4",
+            "name": "Carnival",
+            "author": "Aylex",
+            "picture": "songs/covers/aylex-carnival.webp",
+            "file": "songs/aylex-carnival.mp3",
+            "duration": 110
+        },
+        {
+            "id": "5",
+            "name": "Last Summer",
+            "author": "Aylex",
+            "picture": "songs/covers/aylex-last-summer.webp",
+            "file": "songs/aylex-last-summer.mp3",
+            "duration": 172
+        },
+        {
+            "id": "6",
+            "name": "Okay Energy",
+            "author": "Aylex",
+            "picture": "songs/covers/aylex-okay-energy.webp",
+            "file": "songs/aylex-okay-energy.mp3",
+            "duration": 132
+        },
+        {
+            "id": "7",
+            "name": "Follow The Sun",
+            "author": "Luke Bergs & Waesto",
+            "picture": "songs/covers/luke-bergs-waesto-follow-the-sun.webp",
+            "file": "songs/luke-bergs-waesto-follow-the-sun.mp3",
+            "duration": 177
+        },
+        {
+            "id": "8",
+            "name": "Back Alley",
+            "author": "Burgundy X",
+            "picture": "songs/covers/burgundy-x-back-alley.webp",
+            "file": "songs/burgundy-x-back-alley.mp3",
+            "duration": 107
+        },
+        {
+            "id": "9",
+            "name": "Funk Station",
+            "author": "Tetuano",
+            "picture": "songs/covers/tetuano-funk-station.webp",
+            "file": "songs/tetuano-funk-station.mp3",
+            "duration": 150
+        },
+        {
+            "id": "10",
+            "name": "Dusty Roads",
+            "author": "Calima",
+            "picture": "songs/covers/calima-dusty-roads.webp",
+            "file": "songs/calima-dusty-roads.mp3",
+            "duration": 138
+        },
+        {
+            "id": "11",
+            "name": "Sharp Stones",
+            "author": "Dagored",
+            "picture": "songs/covers/dagored-sharp-stones.webp",
+            "file": "songs/dagored-sharp-stones.mp3",
+            "duration": 121
         }
     ]
 }

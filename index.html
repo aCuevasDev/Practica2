@@ -12,7 +12,7 @@
 
 <body>
     <div class="header">
-        <img id="music icon" class="icon" src="/songs/covers/placeholder.svg"></svg>
+        <img id="music-icon" class="icon" src="songs/covers/placeholder.svg" />
         <p>Reproductor Musical</p>
         <p>Práctica M6 - Javascript nativo + Tailwind + Howler.js</p>
     </div>
@@ -20,6 +20,12 @@
     <main>
         <div id="songList">
             <div id="songListHeader"><span>Lista de reproducción</span><span id="totalSongNumber">N canciones</span>
+                <div class="sortBar">
+                    <span>Order By:</span>
+                    <button data-sort="name">Name</button>
+                    <button data-sort="author">Author</button>
+                    <button data-sort="duration">Duration</button>
+                </div>
             </div>
             <div class="cards-container">
                 <!-- <div class="card"> Placeholder
@@ -32,7 +38,7 @@
         </div>
 
         <div id="playingNow">
-            <img class="currentCover" src="songs/covers/placeholder.svg" alt="Cover Art">
+            <img class="currentCover" src="songs/covers/placeholder.svg" alt="Cover Art" />
             <span id="currentlyPlaying" hidden>Sonando Ahora</span>
             <span class="currentSong">Ninguna canción seleccionada</span>
             <span class="currentAuthor"></span>

@@ -1,5 +1,31 @@
 import { getRandomInt, formatTime } from "./helper.js";
 
+const REFRESH_INTERVAL_MS = 250;
+const SORT_MODE =
+{
+    NAME: "name",
+    AUTHOR: "author",
+    DURATION: "duration"
+};
+
+let isRandom = false;
+let isRepeat = false;
+let isMuted = false;
+let howl;
+let currentSongIndex = 0;
+
+const randomBtn = document.getElementById('random');
+const prevBtn = document.getElementById('prevButton');
+const playPauseBtn = document.getElementById('playPauseButton');
+const nextBtn = document.getElementById('nextButton');
+const repeatBtn = document.getElementById('repeat');
+const volumeSlider = document.getElementById('volumeSlider');
+const muteLabel = document.getElementById('muteVolume');
+const progressSlider = document.getElementById('progressSlider');
+const currentTimeSpan = document.getElementById('currentTime');
+const songListElement = document.querySelector(".cards-container");
+
+
 let songs;
 try {
     const response = await fetch('./songs.json');
@@ -10,63 +36,35 @@ try {
     songs = songFile.songs;
 } catch (error) {
     console.error('Error loading songs json file.', error);
-    //throw error;
     songs = [];
 }
 
-const randomBtn = document.getElementById('random');
-const prevBtn = document.getElementById('prevButton');
-const playPauseBtn = document.getElementById('playPauseButton');
-const nextBtn = document.getElementById('nextButton');
-const repeatBtn = document.getElementById('repeat');
-const volumeSlider = document.getElementById('volumeSlider');
-const muteLabel = document.getElementById('muteVolume');
-const progressSlider = document.getElementById('progressSlider');
-
-
-randomBtn.addEventListener('click', toggleRandom);
-prevBtn.addEventListener('click', playPreviousSong);
-playPauseBtn.addEventListener('click', togglePlayPause);
-nextBtn.addEventListener('click', playNextSong);
-repeatBtn.addEventListener('click', toggleRepeat);
-volumeSlider.addEventListener('input', volumeSliderChange);
-muteLabel.addEventListener('click', toggleMute);
-progressSlider.addEventListener('input', progressBarChange);
-
-const REFRESH_INTERVAL_MS = 250;
-setInterval(updateCurrentProgressSongInterval, REFRESH_INTERVAL_MS);
-
-
-//window.onload(() => buildSongList()); //TODO look for a nicer way
-buildSongList(); // Module
-setTotalSongNumber();
-
-let isRandom = false;
-let isRepeat = false;
-let isMuted = false;
-let howl; //Howl type
-let currentSongIndex = 0;
 
 
 function toggleRandom() {
     isRandom = !isRandom;
+    randomBtn.setAttribute('aria-pressed', isRandom);
 }
 
 function toggleRepeat() {
     isRepeat = !isRepeat;
+    repeatBtn.setAttribute('aria-pressed', isRepeat);
 
     if (howl)
         howl.loop(isRepeat);
 }
 
 function toggleMute() {
-    isMuted = !isMuted;
-    muteLabel.setAttribute('aria-pressed', isMuted);
-    muteLabel.textContent = isMuted ? '🔇' : '🔈';
+    setMuted(!isMuted);
+}
+
+function setMuted(muted) {
+    isMuted = muted;
+    muteLabel.setAttribute('aria-pressed', muted);
+    muteLabel.textContent = muted ? '🔇' : '🔈';
 
     if (howl)
         howl.mute(isMuted);
-
 }
 
 function togglePlayPause() {
@@ -90,22 +88,20 @@ function updatePlayPauseButton() {
 //@beforeOrAfter has to be either "Before" for previous song or "After" for the next song
 function getSongIndexFor(beforeOrAfter = "Before") {
     let nextSongIndex;
+    let sanitizedStr = beforeOrAfter.trim().toLowerCase();
 
-    if (beforeOrAfter.trim().toLowerCase() === "before") {
-        //nextSongIndex = activeSongIndex - 1;
-        nextSongIndex = Number(currentSongIndex) - 1;
+    if (sanitizedStr === "before")
+        nextSongIndex = currentSongIndex - 1;
+    else if (sanitizedStr === "after")
+        nextSongIndex = currentSongIndex + 1;
+    else throw new Error("Invalid parameter");
 
-    } else if (beforeOrAfter.trim().toLowerCase() === "after") {
-        //nextSongIndex = activeSongIndex + 1;
-        nextSongIndex = Number(currentSongIndex) + 1;
-    } else throw new Error("Invalid parameter");
-
-    if (nextSongIndex < 0) {
+    if (nextSongIndex < 0)
         nextSongIndex = songs.length - 1;
-    }
-    if (nextSongIndex >= songs.length) {
+
+    if (nextSongIndex >= songs.length)
         nextSongIndex = 0;
-    }
+
 
     return nextSongIndex;
 }
@@ -124,37 +120,38 @@ function playSongController(beforeOrAfter) {
         return;
     }
 
-    if (isRepeat) {
-        playSong(currentSongIndex);
-        return;
-    }
-
     let songIndex = getSongIndexFor(beforeOrAfter);
     playSong(songIndex);
 }
 
 function playRandomSong() {
+    let randomIndex;
     if (songs.length > 1) {
         do {
-            const randomIndex = getRandomInt(0, songs.length);
-        } while (randomIndex == currentSongIndex);
+            randomIndex = getRandomInt(0, songs.length);
+        } while (randomIndex === currentSongIndex);
         playSong(randomIndex);
     }
 }
 
+function onSongEnd() {
+    if (isRepeat)
+        return;
+
+    playNextSong();
+}
+
 function howlerLoaded() {
-    //playPauseBtn.classList.remove('disabled');
-    //playPauseBtn.removeAttribute('disabled');
     setTotalDuration();
     updatePlayPauseButton();
 }
 
-function howlerLoadError() {
-    console.error("Error loading howler"); // TODO get err message from howler
+function howlerLoadError(id, error) {
+    console.error(`Error loading audio (id ${id}):`, error);
 }
 
-function howlerPlayError() {
-    console.error("Error playing howler."); // TODO get err message from howler
+function howlerPlayError(id, error) {
+    console.error(`Error playing audio (id ${id}):`, error);
 }
 
 function volumeSliderChange() {
@@ -165,40 +162,52 @@ function volumeSliderChange() {
         howl.volume(volume);
 
     volumeSpan.textContent = Math.round(volume * 100) + '%';
-    volumeSlider.style.setProperty('--progress', (volumeSlider.value / volumeSlider.max * 100) + '%');
+    updateSliderFill(volumeSlider);
+
+    setMuted(volume === 0);
 }
 
 function buildSongList() {
-    const songListElement = document.querySelector(".cards-container");
+    songListElement.innerHTML = "";
+
     songs.forEach((song, index) => {
         let cardStr = `                
                 <div class="card" data-index="${index}" >
                     <img class="coverArt" src="${song.picture}" alt="Cover Art">
                     <span class="songName">${song.name}</span>
                     <span class="author">${song.author}</span>
+                    <span class="duration">${formatTime(song.duration)}</span>
                 </div>`;
 
-        //<span class="duration">${formatTime(song.duration)}</span>
         songListElement.insertAdjacentHTML('beforeend', cardStr);
     });
+}
 
-    songListElement.addEventListener('click', (event) => {
-        const card = event.target.closest('.card');
-        if (card) {
-            let index = Number(card.dataset.index);
-            playSong(index);
-        }
-    })
+function handleSongListClick(event) {
+    const card = event.target.closest('.card');
+    if (card) {
+        let index = Number(card.dataset.index);
+        playSong(index);
+    }
 }
 
 
-
 function playSong(songIndex) {
-    let song = songs[songIndex];
+    const song = songs[songIndex];
 
     if (!song)
         return;
 
+    createPlayer(song);
+    currentSongIndex = songIndex;
+    renderNowPlaying(song);
+    highlightSongCard(currentSongIndex);
+    resetProgressBar();
+    //updatePlayPauseButton(); both are called after song is loaded @ howlerLoaded();
+    //setTotalDuration(); 
+}
+
+function createPlayer(song) {
     if (howl)
         howl.unload();
 
@@ -208,41 +217,33 @@ function playSong(songIndex) {
             volume: Number(volumeSlider.value),
             loop: isRepeat,
             mute: isMuted,
-            onend: playNextSong,
+            onend: onSongEnd,
             onload: howlerLoaded,
             onloaderror: howlerLoadError,
             onplayerror: howlerPlayError
         });
 
     howl.play();
-    currentSongIndex = songIndex;
-    resetProgressBar();
-    updateNowPlaying(song);
-    updateNowPlayingCard(currentSongIndex);
-    //updatePlayPauseButton(); both are called after song is loaded
-    //setTotalDuration(); 
 }
 
-function updateNowPlaying(song) {
+function renderNowPlaying(song) {
     document.querySelectorAll('.currentCover').forEach(element => element.src = song.picture);
     document.querySelectorAll('.currentSong').forEach(element => element.textContent = song.name);
     document.querySelectorAll('.currentAuthor').forEach(element => element.textContent = song.author);
-    document.querySelectorAll('.currentSongInfo').forEach(element => element.classList.add('.active'));
 
     document.getElementById('currentlyPlaying').hidden = false;
 }
 
-function updateNowPlayingCard(index) {
+function highlightSongCard(index) {
     document.querySelectorAll(".playing")
         .forEach(elem => elem.classList.remove("playing"));
 
-    const card = document.querySelectorAll(".card")[index];
-    card.classList.add("playing");
+    const card = document.querySelector(`.card[data-index="${index}"]`);
+    card?.classList.add("playing");
 }
 
 
 function setTotalDuration() {
-    const progressSlider = document.getElementById('progressSlider');
     const durationSpan = document.getElementById("totalTime");
     let currentSongDuration = howl.duration();
 
@@ -256,20 +257,18 @@ function setTotalSongNumber() {
 }
 
 function updateCurrentProgressSongInterval() {
-    const currentTimeSpan = document.getElementById('currentTime');
 
     if (!howl)
         return;
 
     const currentPosition = howl.seek();
     progressSlider.value = currentPosition;
-    progressSlider.style.setProperty('--progress', (progressSlider.value / progressSlider.max * 100) + '%');
+    updateSliderFill(progressSlider);
 
     currentTimeSpan.textContent = formatTime(currentPosition);
 }
 
 function progressBarChange() {
-    const currentTimeSpan = document.getElementById('currentTime');
 
     if (!howl) {
         resetProgressBar();
@@ -283,8 +282,68 @@ function progressBarChange() {
 }
 
 function resetProgressBar() {
-    const currentTimeSpan = document.getElementById('currentTime');
-
     progressSlider.value = 0;
     currentTimeSpan.textContent = formatTime(0);
 }
+
+function updateSliderFill(slider) {
+    slider.style.setProperty('--progress', (slider.value / slider.max * 100) + '%');
+}
+
+// sortMode : SORT_MODE
+function sortSongList(sortMode, sortOrder) {
+    switch (sortMode) {
+        case 'name':
+            songs.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'author':
+            songs.sort((a, b) => a.author.localeCompare(b.author));
+            break;
+        case 'duration':
+            songs.sort((a, b) => (a.duration - b.duration));
+            break;
+    }
+
+    if (sortOrder !== 'desc')
+        songs.reverse();
+}
+
+// SETTING LISTENERS AND EVENTS
+function init() {
+    randomBtn.addEventListener('click', toggleRandom);
+    prevBtn.addEventListener('click', playPreviousSong);
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    nextBtn.addEventListener('click', playNextSong);
+    repeatBtn.addEventListener('click', toggleRepeat);
+    volumeSlider.addEventListener('input', volumeSliderChange);
+    muteLabel.addEventListener('click', toggleMute);
+    progressSlider.addEventListener('input', progressBarChange);
+    songListElement.addEventListener('click', handleSongListClick)
+
+    setInterval(updateCurrentProgressSongInterval, REFRESH_INTERVAL_MS);
+
+    renderSongList();
+}
+
+function renderSongList(sortMode = SORT_MODE.NAME, sortOrder = 'desc') {
+    sortSongList(sortMode, sortOrder);
+    buildSongList();
+    setTotalSongNumber();
+}
+
+init();
+
+
+document.querySelectorAll('.sortBar button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const asc = btn.dataset.order !== 'asc';           // flip direction on each click
+        document.querySelectorAll('.sortBar button').forEach(b => {
+            b.classList.remove('toggled');
+            delete b.dataset.order;
+        });
+        btn.classList.add('toggled');
+        btn.dataset.order = asc ? 'asc' : 'desc';
+
+        renderSongList(btn.dataset.sort, btn.dataset.order);
+    });
+});

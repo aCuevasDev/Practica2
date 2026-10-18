@@ -123,18 +123,62 @@ main {
 
 #songListHeader {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 14px;
+    row-gap: 10px;
+    padding: 14px;
     font-weight: 600;
     font-size: 15px;
     border-bottom: 1px solid var(--border);
 }
 
-#songListHeader span:last-child {
+#totalSongNumber {
     font-size: 12px;
     font-weight: 400;
     color: var(--text-muted);
+}
+
+/* "Order by" row (full width, under the title) */
+.sortBar {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.sortBar button {
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.sortBar button:hover {
+    color: var(--text);
+    border-color: var(--track);
+}
+
+.sortBar button.toggled {
+    color: var(--accent-light);
+    border-color: var(--accent);
+    box-shadow: none;
+}
+
+/* Direction arrow: set data-order="asc" | "desc" from JS */
+.sortBar button[data-order="asc"]::after {
+    content: " ↑";
+}
+
+.sortBar button[data-order="desc"]::after {
+    content: " ↓";
 }
 
 .cards-container {
@@ -282,9 +326,34 @@ main {
 /* Big card (right column, top) */
 #playingNow {
     grid-template-columns: 68px minmax(0, 1fr);
+    grid-template-areas:
+        "cover title"
+        "cover author";
     column-gap: 14px;
     align-content: center;
     padding: 14px;
+}
+
+/* When the "Sonando ahora" label is visible, add a row for it */
+#playingNow:has(#currentlyPlaying:not([hidden])) {
+    grid-template-areas:
+        "cover label"
+        "cover title"
+        "cover author";
+}
+
+#currentlyPlaying {
+    grid-area: label;
+    align-self: end;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+}
+
+#currentlyPlaying[hidden] {
+    display: none;
 }
 
 #playingNow .currentCover {
@@ -301,20 +370,6 @@ main {
 #playingNow .currentAuthor {
     font-size: 13px;
     margin-top: 2px;
-}
-
-#currentlyPlaying {
-    grid-area: label;
-    align-self: end;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent-light);
-}
-
-#currentlyPlaying[hidden] {
-    display: none;
 }
 
 /* =========================================================
