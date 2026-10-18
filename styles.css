@@ -1,0 +1,620 @@
+/* =========================================================
+   JUKEBOX - styles.css
+   ========================================================= */
+
+:root {
+    --bg: #0a0e1f;
+    --bg-footer: #0f1529;
+    --panel: #0f1529;
+    --panel-2: #0b1020;
+    --border: #1c2440;
+    --border-soft: #161d36;
+    --row-active: #151c33;
+    --text: #e8ebf5;
+    --text-muted: #8a93ad;
+    --accent: #8b5cf6;
+    --accent-light: #a78bfa;
+    --accent-dark: #6d3df0;
+    --track: #2a3350;
+    --radius: 16px;
+    --footer-h: 104px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.header {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    column-gap: 14px;
+    align-items: center;
+    width: min(1100px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 28px 0 22px;
+}
+
+.header .icon {
+    grid-row: 1 / span 2;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #1d1b45;
+    border: 1px solid #2d2a66;
+    object-fit: cover;
+}
+
+.header p:first-of-type {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    align-self: end;
+}
+
+.header p:last-of-type {
+    font-size: 12px;
+    color: var(--text-muted);
+    align-self: start;
+    margin-top: 3px;
+}
+
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+main {
+    flex: 1;
+    min-height: 0;
+    width: min(1100px, calc(100% - 48px));
+    margin: 0 auto 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 20px;
+}
+
+#songList,
+#playingNow,
+#equalizer {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+/* =========================================================
+   PLAYLIST
+   ========================================================= */
+#songList {
+    grid-row: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#songListHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 14px;
+    font-weight: 600;
+    font-size: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+#songListHeader span:last-child {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.cards-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Custom scrollbar */
+.cards-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+    background: var(--track);
+    border-radius: 3px;
+}
+
+.cards-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    grid-template-areas:
+        "cover name   status"
+        "cover author status";
+    column-gap: 12px;
+    align-items: center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.card:hover {
+    background: #121a30;
+}
+
+.card.active,
+.card.playing {
+    background: var(--row-active);
+}
+
+.card .coverArt {
+    grid-area: cover;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--track);
+}
+
+.card .songName {
+    grid-area: name;
+    font-size: 13px;
+    font-weight: 500;
+    align-self: end;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card .author {
+    grid-area: author;
+    font-size: 11px;
+    color: var(--text-muted);
+    align-self: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* "▶ sonando" label (add it from JS: <span class="status">) */
+.card .status,
+.card.active::after,
+.card.playing::after {
+    grid-area: status;
+    font-size: 11px;
+    color: var(--accent-light);
+}
+
+.card.active::after,
+.card.playing::after {
+    content: "▶ sonando";
+}
+
+/* If you create a real .status element, hide the pseudo-element */
+.card:has(.status)::after {
+    content: none;
+}
+
+/* =========================================================
+   NOW PLAYING + FOOTER SONG INFO (shared layout)
+   Both use .currentCover / .currentSong / .currentAuthor
+   ========================================================= */
+#playingNow,
+#currentSongInfo {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-areas:
+        "cover title"
+        "cover author";
+    column-gap: 12px;
+    align-items: center;
+    min-width: 0;
+}
+
+.currentCover {
+    grid-area: cover;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--track);
+}
+
+.currentSong {
+    grid-area: title;
+    align-self: end;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.currentAuthor {
+    grid-area: author;
+    align-self: start;
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Footer version */
+#currentSongInfo {
+    grid-area: info;
+}
+
+/* Big card (right column, top) */
+#playingNow {
+    grid-template-columns: 68px minmax(0, 1fr);
+    column-gap: 14px;
+    align-content: center;
+    padding: 14px;
+}
+
+#playingNow .currentCover {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+}
+
+#playingNow .currentSong {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#playingNow .currentAuthor {
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+#currentlyPlaying {
+    grid-area: label;
+    align-self: end;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+}
+
+#currentlyPlaying[hidden] {
+    display: none;
+}
+
+/* =========================================================
+   EQUALIZER (right column, bottom)
+   ========================================================= */
+#equalizer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    padding: 14px;
+}
+
+#equalizer .eq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+#equalizer h2,
+#equalizer h3 {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#equalizer .eq-header span,
+#equalizer small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Spectrum (canvas or a div with bars) */
+#equalizer canvas,
+#equalizer .spectrum {
+    width: 100%;
+    flex: 1;
+    min-height: 90px;
+    background: var(--panel-2);
+    border-radius: 8px;
+}
+
+#equalizer .spectrum {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 0;
+    overflow: hidden;
+}
+
+#equalizer .spectrum .bar {
+    flex: 1;
+    min-height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(to top, var(--accent-dark), var(--accent-light));
+}
+
+/* Bass / mid / treble sliders */
+#equalizer .eq-bands {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+#equalizer .eq-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 6px;
+    background: var(--panel-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+#equalizer .eq-band input[type="range"] {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    width: 14px;
+    height: 100px;
+}
+
+#equalizer .eq-band .value,
+#equalizer .eq-band output {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+#equalizer button,
+#equalizer .reset {
+    padding: 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+#equalizer button:hover,
+#equalizer .reset:hover {
+    background: #151c33;
+}
+
+/* =========================================================
+   FOOTER / PLAYER
+   ========================================================= */
+.footer {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas:
+        "progress progress progress"
+        "info     controls volume";
+    align-items: center;
+    row-gap: 12px;
+    padding: 14px max(24px, calc((100% - 1100px) / 2 + 12px)) 16px;
+    background: var(--bg-footer);
+    border-top: 1px solid var(--border);
+}
+
+/* Progress bar */
+#progressBar {
+    grid-area: progress;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+#progressSlider {
+    flex: 1;
+    --progress: 0%;
+}
+
+/* Controls (center) */
+#controls {
+    grid-area: controls;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+#controls button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    border-radius: 50%;
+    line-height: 1;
+    opacity: 0.75;
+    transition: transform 0.1s, opacity 0.15s;
+}
+
+#controls button:hover {
+    opacity: 1;
+}
+
+#controls button:active {
+    transform: scale(0.92);
+}
+
+button.toggled,
+button[aria-pressed="true"] {
+    opacity: 1;
+    background: rgba(139, 92, 246, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.6);
+}
+
+#controls #playPauseButton.toggled {
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.35);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--accent-light);
+    outline-offset: 2px;
+}
+
+#controls #playPauseButton {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    background: #fff;
+    opacity: 1;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04);
+}
+
+#controls #playPauseButton:hover {
+    transform: scale(1.06);
+}
+
+/* Volume (right) */
+#volumeControl {
+    grid-area: volume;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+#volumeControl label {
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#volumeSlider {
+    width: 80px;
+    --progress: 100%;
+}
+
+#volumeValue {
+    min-width: 34px;
+    text-align: right;
+}
+
+/* =========================================================
+   RANGE SLIDERS (progress + volume)
+   Update --progress from JS:
+   slider.style.setProperty('--progress', (slider.value / slider.max * 100) + '%')
+   ========================================================= */
+#progressSlider,
+#volumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    background: linear-gradient(to right,
+            var(--accent) 0%,
+            var(--accent) var(--progress),
+            var(--track) var(--progress),
+            var(--track) 100%);
+}
+
+#progressSlider::-webkit-slider-thumb,
+#volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+
+#progressSlider::-moz-range-thumb,
+#volumeSlider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+
+#progressSlider::-moz-range-track,
+#volumeSlider::-moz-range-track {
+    background: transparent;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 800px) {
+    body {
+        overflow: auto;
+        height: auto;
+    }
+
+    main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        margin-bottom: 16px;
+    }
+
+    #songList {
+        grid-row: auto;
+        max-height: 60vh;
+    }
+
+    .footer {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "progress"
+            "info"
+            "controls"
+            "volume";
+        justify-items: center;
+        position: sticky;
+        bottom: 0;
+    }
+
+    #volumeControl {
+        justify-self: center;
+    }
+}

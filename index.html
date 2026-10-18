@@ -12,25 +12,30 @@
 
 <body>
     <div class="header">
-        <svg id="music icon" class="icon"></svg>
+        <img id="music icon" class="icon" src="/songs/covers/placeholder.svg"></svg>
         <p>Reproductor Musical</p>
-        <p>Práctica M6 - Javascript nativo + Tailwind + Howler.js</p> <!-- Mirar de añadir Tailwind -->
+        <p>Práctica M6 - Javascript nativo + Tailwind + Howler.js</p>
     </div>
 
     <main>
         <div id="songList">
-            <div id="songListHeader"><span>Lista de reproducción</span><span>11 canciones</span></div>
+            <div id="songListHeader"><span>Lista de reproducción</span><span id="totalSongNumber">N canciones</span>
+            </div>
             <div class="cards-container">
-                <div class="card">
+                <!-- <div class="card"> Placeholder
                     <img class="coverArt" src="" alt="Cover Art">
-                    <span class="songName">NombrePlaceholder</span>
-                    <span class="author">AutorPlaceholder</span>
-                </div>
+                    <span class="songName">nombrePlaceholder</span>
+                    <span class="author">autorPlaceholder</span>
+                    <span class="duration">durationPlaceholder</span>
+                </div> -->
             </div>
         </div>
 
         <div id="playingNow">
-
+            <img class="currentCover" src="songs/covers/placeholder.svg" alt="Cover Art">
+            <span id="currentlyPlaying" hidden>Sonando Ahora</span>
+            <span class="currentSong">Ninguna canción seleccionada</span>
+            <span class="currentAuthor"></span>
         </div>
         <div id="equalizer">
 
@@ -39,24 +44,25 @@
     <div class="footer" id="player">
         <div id="progressBar">
             <span id="currentTime">0:00</span>
-            <input type="range" id="progressSlider" min="0" max="100" value="0">
+            <input type="range" id="progressSlider" min="0" max="100" value="0" step="0.1">
             <span id="totalTime">0:00</span>
         </div>
 
-        <div id="songInfo">
-            <img id="currentCover" src="" alt="Cover Art">
-            <span id="currentSong">CanciónPlaceholder</span>
-            <span id="currentAuthor">AutorPlaceholder</span>
+        <div id="currentSongInfo">
+            <img class="currentCover" src="songs/covers/placeholder.svg" alt="Cover Art">
+            <span class="currentSong">Ninguna canción seleccionada</span>
+            <span class="currentAuthor"></span>
+
         </div>
         <div id="controls">
             <button id="random">🔀</button>
             <button id="prevButton">⏮️</button>
-            <button id="playPauseButton" class="disabled" disabled>▶️</button>
+            <button id="playPauseButton">▶️</button>
             <button id="nextButton">⏭️</button>
             <button id="repeat">🔁</button>
         </div>
         <div id="volumeControl">
-            <label for="volumeSlider">VolumenPlaceholder:</label>
+            <label for="volumeSlider" id="muteVolume">🔈</label>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
             <span id="volumeValue">100%</span>
         </div>
