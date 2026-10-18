@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JUKEBOX</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="index.js"></script>
+    <script src="node_modules/howler/dist/howler.js"></script> <!-- Run npm install first -->
+    <script type="module" src="index.js"></script>
 </head>
 
 <body>
@@ -21,9 +22,9 @@
             <div id="songListHeader"><span>Lista de reproducción</span><span>11 canciones</span></div>
             <div class="cards-container">
                 <div class="card">
-                    <img id="coverArt" src="" alt="Cover Art">
-                    <span id="songName">NombrePlaceholder</span>
-                    <span id="author">AutorPlaceholder</span>
+                    <img class="coverArt" src="" alt="Cover Art">
+                    <span class="songName">NombrePlaceholder</span>
+                    <span class="author">AutorPlaceholder</span>
                 </div>
             </div>
         </div>
@@ -43,9 +44,9 @@
         </div>
 
         <div id="songInfo">
-            <img id="coverArt" src="" alt="Cover Art">
+            <img id="currentCover" src="" alt="Cover Art">
             <span id="currentSong">CanciónPlaceholder</span>
-            <span id="author">AutorPlaceholder</span>
+            <span id="currentAuthor">AutorPlaceholder</span>
         </div>
         <div id="controls">
             <button id="random">🔀</button>

@@ -1,6 +1,17 @@
-import { Howl, Howler } from 'howler';
 
-const songs = JSON.parse('songs.json').songs;
+
+let songs = [];
+try {
+    const response = await fetch('./songs.json');
+    if (!response.ok) {
+        throw new Error(`Failed to load songs.json: ${response.status} ${response.statusText}`);
+    }
+    const songFile = await response.json();
+    songs = songFile.songs;
+} catch (error) {
+    console.error('Error loading songs json file.', error);
+    throw error;
+}
 
 const randomBtn = document.getElementById('random');
 const prevBtn = document.getElementById('prevButton');
@@ -14,18 +25,19 @@ prevBtn.addEventListener('click', playPreviousSong);
 playPauseBtn.addEventListener('click', togglePlayPause);
 nextBtn.addEventListener('click', playNextSong);
 repeatBtn.addEventListener('click', toggleRepeat);
-volumeSlider.addEventListener('onChange', volumeSliderChange);
+volumeSlider.addEventListener('input', volumeSliderChange);
 
-document.onload(buildSongList); //TODO look for a nicer way
-
+//window.onload(() => buildSongList()); //TODO look for a nicer way
+buildSongList(); // Module
 
 let isRandom = false;
 let isRepeat = false;
 let isPlaying = false;
 let isMuted = false;
 
+songs
 const howl = new Howl({
-    src: ['songs/Pufino - Fantasy (freetouse.com).mp3'],
+    src: songs[0].file,
     html5: true,
 });
 
@@ -46,24 +58,53 @@ function toggleMute() {
     howl.mute(isMuted);
 }
 
-function playPreviousSong() {
+function togglePlayPause() {
+    isPlaying = !isPlaying;
+    if (isPlaying)
+        howl.play();
+    else howl.pause();
+}
+
+//Gets Previous or Next song on the list based on the parameter given
+//@beforeOrAfter has to be either "Before" for previous song or "After" for the next song
+// A song must be active
+function getSongAt(beforeOrAfter = "Before") {
+    if (beforeOrAfter.trim().toLowerCase() === "before") {
+
+    } else if (beforeOrAfter.trim().toLowerCase() === "after") {
+
+    } else throw new Error("Invalid parameter");
+
     let activeSongIndex = songs.findIndex(song => song.file === howl._src);
     let nextSongIndex = activeSongIndex - 1;
     if (nextSongIndex < 0) {
         nextSongIndex = songs.length;
     }
 
+
+}
+
+function playNextSong() {
+
+}
+
+function playPreviousSong() {
+    let previousSong = getSongAt("before");
     howl.stop();
-    howl = new Howl({
-        src: [songs[nextSongIndex].file],
-        html5: true,
-    });
+    //howl.src = songs[nextSongIndex].file;
+    howl = new Howl()
+    {
+        src = previousSong;
+    }
+    howl.play();
 
 }
 
 function howlerLoaded() {
-    playPauseBtn.classList.remove('disable');
-    playPauseBtn.removeAttribute('disable');
+    playPauseBtn.classList.remove('disabled');
+    playPauseBtn.removeAttribute('disabled');
+
+    howl.play();
 }
 
 function volumeSliderChange() {
@@ -81,15 +122,16 @@ function progressBarChange() {
 
 
 function buildSongList() {
-    const songListElement = document.querySelector("cards-container");
-    songs.array.forEach(song => {
+    const songListElement = document.querySelector(".cards-container");
+    songs.forEach(song => {
         let cardStr = `                
                 <div class="card">
-                    <img id="coverArt" src="${song.picture}" alt="Cover Art">
-                    <span id="songName">${song.name}</span>
-                    <span id="author">${song.author}</span>
+                    <img class="coverArt" src="${song.picture}" alt="Cover Art">
+                    <span class="songName">${song.name}</span>
+                    <span class="author">${song.author}</span>
                 </div>`;
-        songListElement.append(cardStr);
+
+        songListElement.insertAdjacentHTML('beforeend', cardStr);
     });
 }
 

@@ -4,9 +4,25 @@
             "id": "1",
             "name": "Fantasy",
             "author": "Pufino",
-            "picture": "songs/images/pufino - fantasy.webp",
-            "file": "songs/Pufino - Fantasy (freetouse.com).mp3",
-            "duration": 215
+            "picture": "songs/covers/pufino-fantasy.webp",
+            "file": "songs/pufino-fantasy.mp3",
+            "duration": 131
+        },
+        {
+            "id": "2",
+            "name": "Avocado",
+            "author": "Pufino",
+            "picture": "songs/covers/pufino-avocado.webp",
+            "file": "songs/pufino-avocado.mp3",
+            "duration": 167
+        },
+        {
+            "id": "3",
+            "name": "Vibing",
+            "author": "Pufino",
+            "picture": "songs/covers/pufino-vibing.webp",
+            "file": "songs/pufino-vibing.mp3",
+            "duration": 132
         }
     ]
 }
