@@ -21,6 +21,8 @@ const nextBtn = document.getElementById('nextButton');
 const repeatBtn = document.getElementById('repeat');
 const volumeSlider = document.getElementById('volumeSlider');
 const muteLabel = document.getElementById('muteVolume');
+const progressSlider = document.getElementById('progressSlider');
+
 
 randomBtn.addEventListener('click', toggleRandom);
 prevBtn.addEventListener('click', playPreviousSong);
@@ -29,6 +31,7 @@ nextBtn.addEventListener('click', playNextSong);
 repeatBtn.addEventListener('click', toggleRepeat);
 volumeSlider.addEventListener('input', volumeSliderChange);
 muteLabel.addEventListener('click', toggleMute);
+progressSlider.addEventListener('input', progressBarChange);
 
 const REFRESH_INTERVAL_MS = 250;
 setInterval(updateCurrentProgressSongInterval, REFRESH_INTERVAL_MS);
@@ -187,6 +190,7 @@ function playSong(songIndex) {
             volume: Number(volumeSlider.value),
             loop: isRepeat,
             mute: isMuted,
+            onend: playNextSong,
             onload: howlerLoaded,
             onloaderror: howlerLoadError,
             onplayerror: howlerPlayError
@@ -234,21 +238,33 @@ function setTotalSongNumber() {
 }
 
 function updateCurrentProgressSongInterval() {
-    const progressSlider = document.getElementById('progressSlider');
     const currentTimeSpan = document.getElementById('currentTime');
 
     if (!howl || !howl.playing())
         return;
 
-    let currentPosition = howl.seek();
+    const currentPosition = howl.seek();
     progressSlider.value = currentPosition;
     progressSlider.style.setProperty('--progress', (progressSlider.value / progressSlider.max * 100) + '%');
 
     currentTimeSpan.textContent = formatTime(currentPosition);
 }
 
+function progressBarChange() {
+    const currentTimeSpan = document.getElementById('currentTime');
+
+    if (!howl || !howl.playing()) {
+        resetProgressBar();
+        return;
+    }
+
+    const currentPosition = Number(progressSlider.value);
+    howl.seek(currentPosition);
+    currentTimeSpan.textContent = formatTime(currentPosition);
+
+}
+
 function resetProgressBar() {
-    const progressSlider = document.getElementById('progressSlider');
     const currentTimeSpan = document.getElementById('currentTime');
 
     progressSlider.value = 0;
