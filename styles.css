@@ -204,10 +204,10 @@ main {
 .card {
     position: relative;
     display: grid;
-    grid-template-columns: 34px 1fr auto;
+    grid-template-columns: 34px minmax(0, 1fr) auto auto;
     grid-template-areas:
-        "cover name   status"
-        "cover author status";
+        "cover name   status duration"
+        "cover author status duration";
     column-gap: 12px;
     align-items: center;
     padding: 8px 14px;
@@ -252,6 +252,16 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.card .duration {
+    grid-area: duration;
+    justify-self: end;
+    min-width: 36px;
+    text-align: right;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
 }
 
 /* "▶ sonando" label (add it from JS: <span class="status">) */
