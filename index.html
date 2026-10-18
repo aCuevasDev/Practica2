@@ -44,7 +44,28 @@
             <span class="currentAuthor"></span>
         </div>
         <div id="equalizer">
-
+            <div class="eq-header">
+                <h2>Ecualizador</h2>
+            </div>
+            <div class="spectrum"></div>
+            <div class="eq-bands">
+                <label class="eq-band">
+                    <span>Graves</span>
+                    <input type="range" class="eq-slider" data-band="0" min="-12" max="12" step="1" value="0">
+                    <output class="value">0 dB</output>
+                </label>
+                <label class="eq-band">
+                    <span>Medios</span>
+                    <input type="range" class="eq-slider" data-band="1" min="-12" max="12" step="1" value="0">
+                    <output class="value">0 dB</output>
+                </label>
+                <label class="eq-band">
+                    <span>Agudos</span>
+                    <input type="range" class="eq-slider" data-band="2" min="-12" max="12" step="1" value="0">
+                    <output class="value">0 dB</output>
+                </label>
+            </div>
+            <button class="reset" id="eqReset">Restablecer ecualizador</button>
         </div>
     </main>
     <div class="footer" id="player">
