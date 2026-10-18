@@ -87,14 +87,9 @@ function updatePlayPauseButton() {
 }
 
 //Gets Previous or Next song index on the list based on the parameter given
-//If @random is true, returns a random index from the list 
 //@beforeOrAfter has to be either "Before" for previous song or "After" for the next song
-// A song must be active otherwise returns the first song
-function getSongIndexFor(beforeOrAfter = "Before", random) {
+function getSongIndexFor(beforeOrAfter = "Before") {
     let nextSongIndex;
-
-    if (random)
-        return getRandomInt(0, songs.length);
 
     if (beforeOrAfter.trim().toLowerCase() === "before") {
         //nextSongIndex = activeSongIndex - 1;
@@ -112,23 +107,46 @@ function getSongIndexFor(beforeOrAfter = "Before", random) {
         nextSongIndex = 0;
     }
 
-    return nextSongIndex ?? 0;
+    return nextSongIndex;
 }
 
 function playNextSong() {
-    let nextSongIndex = getSongIndexFor("after", isRandom);
-    playSong(nextSongIndex);
+    playSongController("after");
 }
 
 function playPreviousSong() {
-    let previousSongIndex = getSongIndexFor("before", isRandom);
-    playSong(previousSongIndex);
+    playSongController("before");
+}
+
+function playSongController(beforeOrAfter) {
+    if (isRandom) {
+        playRandomSong();
+        return;
+    }
+
+    if (isRepeat) {
+        playSong(currentSongIndex);
+        return;
+    }
+
+    let songIndex = getSongIndexFor(beforeOrAfter);
+    playSong(songIndex);
+}
+
+function playRandomSong() {
+    if (songs.length > 1) {
+        do {
+            const randomIndex = getRandomInt(0, songs.length);
+        } while (randomIndex == currentSongIndex);
+        playSong(randomIndex);
+    }
 }
 
 function howlerLoaded() {
     //playPauseBtn.classList.remove('disabled');
     //playPauseBtn.removeAttribute('disabled');
     setTotalDuration();
+    updatePlayPauseButton();
 }
 
 function howlerLoadError() {
@@ -201,8 +219,8 @@ function playSong(songIndex) {
     resetProgressBar();
     updateNowPlaying(song);
     updateNowPlayingCard(currentSongIndex);
-    updatePlayPauseButton();
-    //setTotalDuration(); is called after song is loaded
+    //updatePlayPauseButton(); both are called after song is loaded
+    //setTotalDuration(); 
 }
 
 function updateNowPlaying(song) {
@@ -240,7 +258,7 @@ function setTotalSongNumber() {
 function updateCurrentProgressSongInterval() {
     const currentTimeSpan = document.getElementById('currentTime');
 
-    if (!howl || !howl.playing())
+    if (!howl)
         return;
 
     const currentPosition = howl.seek();
@@ -253,7 +271,7 @@ function updateCurrentProgressSongInterval() {
 function progressBarChange() {
     const currentTimeSpan = document.getElementById('currentTime');
 
-    if (!howl || !howl.playing()) {
+    if (!howl) {
         resetProgressBar();
         return;
     }
