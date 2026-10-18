@@ -1,0 +1,256 @@
+import { getRandomInt, formatTime } from "./helper.js";
+import { setupEqualizer } from "./equalizer.js";
+
+const REFRESH_INTERVAL_MS = 250;
+
+let isRandom = false;
+let isRepeat = false;
+let isMuted = false;
+let howl;
+let currentSongIndex = 0;
+let songs = [];
+
+const randomBtn = document.getElementById('random');
+const prevBtn = document.getElementById('prevButton');
+const playPauseBtn = document.getElementById('playPauseButton');
+const nextBtn = document.getElementById('nextButton');
+const repeatBtn = document.getElementById('repeat');
+const volumeSlider = document.getElementById('volumeSlider');
+const muteLabel = document.getElementById('muteVolume');
+const progressSlider = document.getElementById('progressSlider');
+const currentTimeSpan = document.getElementById('currentTime');
+
+export function initPlayer(songList) {
+    songs = songList;
+
+    randomBtn.addEventListener('click', toggleRandom);
+    prevBtn.addEventListener('click', playPreviousSong);
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    nextBtn.addEventListener('click', playNextSong);
+    repeatBtn.addEventListener('click', toggleRepeat);
+    volumeSlider.addEventListener('input', volumeSliderChange);
+    muteLabel.addEventListener('click', toggleMute);
+    progressSlider.addEventListener('input', progressBarChange);
+
+    setInterval(updateCurrentProgressSongInterval, REFRESH_INTERVAL_MS);
+}
+
+function toggleRandom() {
+    isRandom = !isRandom;
+    randomBtn.setAttribute('aria-pressed', isRandom);
+}
+
+function toggleRepeat() {
+    isRepeat = !isRepeat;
+    repeatBtn.setAttribute('aria-pressed', isRepeat);
+
+    if (howl)
+        howl.loop(isRepeat);
+}
+
+function toggleMute() {
+    setMuted(!isMuted);
+}
+
+function setMuted(muted) {
+    isMuted = muted;
+    muteLabel.setAttribute('aria-pressed', muted);
+    muteLabel.textContent = muted ? '🔇' : '🔈';
+
+    if (howl)
+        howl.mute(isMuted);
+}
+
+function togglePlayPause() {
+    if (!howl) {
+        playSong(currentSongIndex);
+        return;
+    }
+
+    if (!howl.playing())
+        howl.play();
+    else howl.pause();
+
+    updatePlayPauseButton();
+}
+
+function updatePlayPauseButton() {
+    playPauseBtn.textContent = howl.playing() ? '⏸️' : '▶️';
+}
+
+//Gets Previous or Next song index on the list based on the parameter given
+//@beforeOrAfter has to be either "Before" for previous song or "After" for the next song
+function getSongIndexFor(beforeOrAfter = "Before") {
+    let nextSongIndex;
+    let sanitizedStr = beforeOrAfter.trim().toLowerCase();
+
+    if (sanitizedStr === "before")
+        nextSongIndex = currentSongIndex - 1;
+    else if (sanitizedStr === "after")
+        nextSongIndex = currentSongIndex + 1;
+    else throw new Error("Invalid parameter");
+
+    if (nextSongIndex < 0)
+        nextSongIndex = songs.length - 1;
+
+    if (nextSongIndex >= songs.length)
+        nextSongIndex = 0;
+
+
+    return nextSongIndex;
+}
+
+function playNextSong() {
+    playSongController("after");
+}
+
+function playPreviousSong() {
+    playSongController("before");
+}
+
+function playSongController(beforeOrAfter) {
+    if (isRandom) {
+        playRandomSong();
+        return;
+    }
+
+    let songIndex = getSongIndexFor(beforeOrAfter);
+    playSong(songIndex);
+}
+
+function playRandomSong() {
+    let randomIndex;
+    if (songs.length > 1) {
+        do {
+            randomIndex = getRandomInt(0, songs.length);
+        } while (randomIndex === currentSongIndex);
+        playSong(randomIndex);
+    }
+}
+
+function onSongEnd() {
+    if (isRepeat)
+        return;
+
+    playNextSong();
+}
+
+function howlerLoaded() {
+    setTotalDuration();
+    updatePlayPauseButton();
+}
+
+function howlerLoadError(id, error) {
+    console.error(`Error loading audio (id ${id}):`, error);
+}
+
+function howlerPlayError(id, error) {
+    console.error(`Error playing audio (id ${id}):`, error);
+}
+
+function volumeSliderChange() {
+    const volumeSpan = document.getElementById('volumeValue');
+    const volume = Number(volumeSlider.value);
+
+    if (howl)
+        howl.volume(volume);
+
+    volumeSpan.textContent = Math.round(volume * 100) + '%';
+    updateSliderFill(volumeSlider);
+
+    setMuted(volume === 0);
+}
+
+export function playSong(songIndex) {
+    const song = songs[songIndex];
+
+    if (!song)
+        return;
+
+    createPlayer(song);
+    currentSongIndex = songIndex;
+    renderNowPlaying(song);
+    highlightSongCard(currentSongIndex);
+    resetProgressBar();
+    //updatePlayPauseButton(); both are called after song is loaded @ howlerLoaded();
+    //setTotalDuration(); 
+}
+
+function createPlayer(song) {
+    if (howl)
+        howl.unload();
+
+    howl = new Howl(
+        {
+            src: song.file,
+            volume: Number(volumeSlider.value),
+            loop: isRepeat,
+            mute: isMuted,
+            onend: onSongEnd,
+            onload: howlerLoaded,
+            onloaderror: howlerLoadError,
+            onplayerror: howlerPlayError
+        });
+
+    setupEqualizer();
+    howl.play();
+}
+
+function renderNowPlaying(song) {
+    document.querySelectorAll('.currentCover').forEach(element => element.src = song.picture);
+    document.querySelectorAll('.currentSong').forEach(element => element.textContent = song.name);
+    document.querySelectorAll('.currentAuthor').forEach(element => element.textContent = song.author);
+
+    document.getElementById('currentlyPlaying').hidden = false;
+}
+
+function highlightSongCard(index) {
+    document.querySelectorAll(".playing")
+        .forEach(elem => elem.classList.remove("playing"));
+
+    const card = document.querySelector(`.card[data-index="${index}"]`);
+    card?.classList.add("playing");
+}
+
+
+function setTotalDuration() {
+    const durationSpan = document.getElementById("totalTime");
+    let currentSongDuration = howl.duration();
+
+    durationSpan.textContent = formatTime(currentSongDuration);
+    progressSlider.max = currentSongDuration;
+}
+
+function updateCurrentProgressSongInterval() {
+
+    if (!howl)
+        return;
+
+    const currentPosition = howl.seek();
+    progressSlider.value = currentPosition;
+    updateSliderFill(progressSlider);
+
+    currentTimeSpan.textContent = formatTime(currentPosition);
+}
+
+function progressBarChange() {
+
+    if (!howl) {
+        resetProgressBar();
+        return;
+    }
+
+    const currentPosition = Number(progressSlider.value);
+    howl.seek(currentPosition);
+    currentTimeSpan.textContent = formatTime(currentPosition);
+
+}
+
+function resetProgressBar() {
+    progressSlider.value = 0;
+    currentTimeSpan.textContent = formatTime(0);
+}
+
+function updateSliderFill(slider) {
+    slider.style.setProperty('--progress', (slider.value / slider.max * 100) + '%');
+}
